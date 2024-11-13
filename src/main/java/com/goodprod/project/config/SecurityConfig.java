@@ -39,10 +39,11 @@ public class SecurityConfig {
                 .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((requests) -> requests
                                 .requestMatchers(
-                                        "/awsda"
-                                ).authenticated()
-                                .anyRequest().permitAll()
-//                        .requestMatchers("/api/v1/wqe").hasRole("ADMIN")
+                                        "/auth",
+                                        "/s3/download"
+                                ).permitAll()
+                                .requestMatchers("/auth/reg").hasRole("ADMIN")
+                                .anyRequest().authenticated()
                 )
                 .exceptionHandling(withDefaults());
 
@@ -70,15 +71,19 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        //Make the below setting as * to allow connection from any hos
-        corsConfiguration.setAllowedOrigins(List.of("*"));
-        //        corsConfiguration.setAllowedOriginPatterns(List.of("http://localhost:4200"));
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "OPTIONS","PUT"));
+
+        // Разрешаем все домены через шаблон паттернов
+        corsConfiguration.setAllowedOriginPatterns(List.of("*"));
+
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "OPTIONS", "PUT", "DELETE"));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowedHeaders(List.of("*"));
         corsConfiguration.setMaxAge(3600L);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
+
         return source;
     }
+
 }

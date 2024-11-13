@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.Set;
 
 @Service
@@ -31,7 +32,7 @@ public class UserService implements UserDetailsService {
                 String.format("Пользователь '%s' не найден", login)
         ));
         return new org.springframework.security.core.userdetails.User(
-                user.getName(),
+                user.getLogin(),
                 user.getPassword(),
                 user.getRoles()
         );
@@ -39,7 +40,6 @@ public class UserService implements UserDetailsService {
 
     public ResponseEntity<?> createUserService(UserDto userDto){
         if(userRepo.findByLogin(userDto.getLogin()).isEmpty()){
-
             User user = new User();
             user.setName(userDto.getName());
             user.setSurname(userDto.getSurname());
@@ -63,6 +63,15 @@ public class UserService implements UserDetailsService {
             return new ResponseEntity<>("Не удалось создать пользователя", HttpStatus.BAD_REQUEST);
 
         }
+    }
 
+    public ResponseEntity<?> createAdmin(){
+        User user = new User();
+        user.setName("admin");
+        user.setLogin("admin");
+        user.setPassword(bCryptPasswordEncoder.encode("admin"));
+        user.setRoles(Set.of(Role.ROLE_ADMIN));
+        userRepo.save(user);
+        return ResponseEntity.ok("Админ создан");
     }
 }
